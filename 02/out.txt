@@ -1,0 +1,10 @@
+Norma macierzy A: 0.5 
+Norma macierzy A^(-1): 29398.7 
+Wskaźnik uwarunkowania macierzy A (norma A * norma A^(-1)): 14699.4
+
+Iloczyn macierzy A*A^(-1):
+       0.999985               0    -0.000976562     0.000244141 
+   -1.52588e-05               1    -0.000732422     0.000244141 
+              0      0.00012207        0.999756     0.000244141 
+              0               0               0               1 
+
