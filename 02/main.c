@@ -4,7 +4,7 @@
 
 #include "nrutil.h"
 #include "nrutil.c"
-#include "ludcmp.c" 
+#include "ludcmp.c"
 #include "lubksb.c"
 
 // #include "/home/NR/numerical_recipes.c/nrutil.h"
@@ -15,7 +15,9 @@
 //   np. tar -czvf lab01.tar.gz lab01/
 
 
-#define N 4 
+#define N 4
+
+
 
 void print_matrix(float **M, int size)
 {
@@ -26,7 +28,7 @@ void print_matrix(float **M, int size)
             printf("%10g ", M[i][j]);
         }
         printf("\n");
-    }  
+    }
     printf("\n");
 }
 
@@ -39,7 +41,7 @@ void print_matrix_to_file(float **M, int size, FILE *pt)
             fprintf(pt, "%15g ", M[i][j]);
         }
         fprintf(pt, "\n");
-    }  
+    }
     fprintf(pt, "\n");
 }
 
@@ -51,7 +53,7 @@ void copy_matrix(float **M, float **copy, int size)
         {
             copy[i][j] = M[i][j];
         }
-    }  
+    }
 }
 
 void product(float **X, float **Y, float **Z, int size)
@@ -62,10 +64,10 @@ void product(float **X, float **Y, float **Z, int size)
         {
             Z[i][j]= 0.;
             for (int k=1; k<=size; ++k)
-                Z[i][j]+= X[i][k] * Y[k][j]; 
+                Z[i][j]+= X[i][k] * Y[k][j];
         }
     }
-}  
+}
 
 //norma macierzy
 float norm(float **M, int size)
@@ -90,16 +92,36 @@ void transpose(float **M)
         {
             float temp = M[i][j];
             M[i][j] = M[j][i];
-            M[j][i] = temp; 
+            M[j][i] = temp;
         }
     }
 }
 
+float determinant(float **A, int size, int *indx, float *d)
+{
+    float det = 1.0;
+    float **A_copy;
+    A_copy = matrix(1, size, 1, size);
+
+    copy_matrix(A, A_copy, size);
+
+    ludcmp(A_copy, size, indx, d);
+
+    for (int i = 1; i <= size; ++i)
+    {
+        det *= A_copy[i][i];
+    }
+
+    free_matrix(A_copy, 1, size, 1, size);
+
+    return det;
+}
+
 int main(void)
 {
-	float **A, **A_copy, **product_A;
+    float **A, **A_copy, **product_A;
     
-	A = matrix(1, N, 1, N);
+    A = matrix(1, N, 1, N);
     A_copy = matrix(1, N, 1, N);
     product_A = matrix(1, N, 1, N);
 
@@ -107,7 +129,7 @@ int main(void)
     float d;
     float f = 1.;
 
-    //wypelnienie macierzy 
+    //wypelnienie macierzy
     //wzor a[i][j]=1/i+j+0, 0 przyjelam. bo korzystam z NR
     for(int i=1; i<=N; ++i){
         for(int j=1; j<=N; ++j){
@@ -130,7 +152,10 @@ int main(void)
     printf("Rozkład LU macierzy A:\n");
     print_matrix(A_copy, N);
 
-    float **a = matrix(1, N, 1, N); 
+    float det_A = determinant(A, N, indx, &d);
+    printf("Wyznacznik macierzy A: %g\n", det_A);
+    
+    float **a = matrix(1, N, 1, N);
 
     for(int i=1; i<=N; ++i)
     {
@@ -141,13 +166,13 @@ int main(void)
     }
     
     for(int i=1; i<=N; i++){
-        lubksb(A_copy, N, indx, a[i]);  
+        lubksb(A_copy, N, indx, a[i]);
     }
 
     /*  Lubksb zwraca kolumny odwróconej macierzy a nie wiersze.
         Aby otrzymać macierz a, która jest odwrotna do macierzy odpowiednio A,
         należy transponować otrzymana macierz a
-    */ 
+    */
     transpose(a);
 
     printf("A^(-1):\n");
@@ -164,13 +189,13 @@ int main(void)
     product(A, a, product_A, N);
     print_matrix_to_file(product_A, N, fp);
 
-    //	Zwolnienie pamieci
-	free_matrix(A, 1, N, 1, N);
+    //    Zwolnienie pamieci
+    free_matrix(A, 1, N, 1, N);
     free_matrix(a, 1, N, 1, N);
 
     free_ivector(indx, 1, N);
     free_matrix(A_copy, 1, N, 1, N);
     free_matrix(product_A, 1, N, 1, N);
     fclose(fp);
-	return 0;
+    return 0;
 }
